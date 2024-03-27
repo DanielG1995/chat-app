@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input,
+select {
+  padding: 5px !important;
+  border: 1px solid black;
+  outline: transparent;
+}
