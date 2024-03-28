@@ -6,15 +6,24 @@ import useChatStore, { Message } from "../store/store";
 import { Chat } from "../interfaces";
 
 export const useChat = () => {
-    const baseUrl = import.meta.env.VITE_URL_SERVER_CHAT
-    const { loadChats, loadMessages, setSocketIsReady, addMessages, updateLastMessage, notification, sendNotification } = useChatStore()
+
+    const {
+        loadChats,
+        loadMessages,
+        setSocketIsReady,
+        addMessages,
+        updateLastMessage,
+        notification,
+        sendNotification
+    } = useChatStore()
+    
     useEffect(() => {
         if (!notification) return;
         emitMessage(notification.event!, notification.message!)
         sendNotification(null)
     }, [notification])
 
-    const socket = useMemo(() => SocketIOClient(baseUrl, {
+    const socket = useMemo(() => SocketIOClient(import.meta.env.VITE_URL_SERVER_CHAT, {
         transportOptions: {
             polling: {
                 extraHeaders: {
@@ -55,10 +64,10 @@ export const useChat = () => {
         })
 
         socket.on('get-messages', (messages) => {
-             loadMessages(messages.map((mssg: Message) => ({ ...mssg, date: new Date(mssg?.date!) })))
+            loadMessages(messages.map((mssg: Message) => ({ ...mssg, date: new Date(mssg?.date!) })))
 
         })
-       
+
         return () => {
             socket.off('message');
         };

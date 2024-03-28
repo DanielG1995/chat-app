@@ -2,7 +2,7 @@
 
 import './App.css'
 import { Loading } from './components/ui/Loading'
-import { RouterApp } from './routes/Router'
+import { RouterApp } from './router/Router'
 import useChatStore from './store/store'
 
 

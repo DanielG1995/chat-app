@@ -6,12 +6,12 @@ import { Friend } from "../interfaces";
 import useChatStore from "../store/store";
 
 export const usePresence = () => {
-    const baseUrl = import.meta.env.VITE_URL_PRESENCE
+   
     const { setFriendStatus } = useChatStore()
 
     const socket = useMemo(
         () =>
-            SocketIOClient(baseUrl, {
+            SocketIOClient(import.meta.env.VITE_URL_PRESENCE, {
                 transportOptions: {
                     polling: {
                         extraHeaders: {

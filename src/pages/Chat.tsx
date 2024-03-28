@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useLayoutEffect, useRef } from "react"
+import { FormEvent, useEffect, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import useChatStore from "../store/store"
 import { IoMdSend } from "react-icons/io"
@@ -7,32 +7,39 @@ import { IoMdSend } from "react-icons/io"
 export const Chat = () => {
     const inputRef = useRef<HTMLInputElement>(null)
     const [params] = useSearchParams()
-    const { sendNotification, addMessages, chats, setCurrentChat, messages, currentChat, userId, updateLastMessage, socketIsReady } = useChatStore()
+    const {
+        sendNotification,
+        addMessages,
+        chats,
+        setCurrentChat,
+        messages,
+        currentChat,
+        userId,
+        updateLastMessage,
+        socketIsReady
+    } = useChatStore()
+
     const divRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         if (chats?.length > 0) {
             setCurrentChat(chats.find(c => c._id === params?.get('id')!)!)
         }
-
     }, [chats])
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         if (socketIsReady)
             sendNotification({ event: 'get-messages', message: params?.get('id')! })
-
     }, [params?.get('id')!, socketIsReady])
-
-
 
     useEffect(() => {
         if (divRef.current) {
-            divRef.current.scrollTop = divRef.current.scrollHeight + 30;
+            divRef.current.scrollTop = divRef.current.scrollHeight + 100;
         }
     }, [messages]);
 
     const handleSubmit = (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault()
-
         const newMssg = {
             _id: `${new Date().getTime()}`,
             sendId: userId!,
@@ -54,7 +61,7 @@ export const Chat = () => {
         <div className="flex flex-col grow justify-start">
             <section className="flex flex-row gap-10 py-3 px-10 items-center w-full shadow-md">
                 <img className="rounded-full" src="https://picsum.photos/50/50" />
-                <p>{currentChat?.participants?.[0]?.name}</p>
+                <p>{currentChat?.participants.map(p => p.name)}</p>
             </section>
             <section ref={divRef} className="m-10 flex flex-col gap-10 p-10 grow overflow-y-auto">
                 {
