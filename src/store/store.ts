@@ -8,7 +8,7 @@ interface Friend {
 }
 
 export interface Message {
-    id: string,
+    _id: string,
     sendId: number
     message: string
     conversationId: string
@@ -16,12 +16,23 @@ export interface Message {
 
 }
 
+export interface Participant {
+    id: number,
+    name: string
+}
 
 export interface Chat {
     _id: string;
-    participants: Friend[]
+    participants: Participant[]
     lastMessage: Message
 }
+
+export interface CurrentChat {
+    _id?: string;
+    participants: (Friend | undefined)[]
+    lastMessage?: Message
+}
+
 
 interface Notification {
     id?: number;
@@ -31,7 +42,7 @@ interface Notification {
 
 interface ChatStoreState {
     userId: number | null;
-    setUserId: (id: number) => void
+    setUserId: (id: number | null) => void
     chats: Chat[]
     friends: Friend[];
     listChats: Chat[];
@@ -44,17 +55,21 @@ interface ChatStoreState {
     loadChats: (chats: Chat[]) => void;
     loadMessages: (messages: Message[]) => void;
     addMessages: (messages: Message) => void
-    sendNotification: (notification: Notification) => void;
+    sendNotification: (notification: Notification | null) => void;
     setLoading: (loading: boolean) => void;
     setFriendStatus: (status: boolean, id: number) => void
     updateLastMessage: (id: string, mssg: Message) => void
     loading: boolean
     messages: Message[]
+    socketIsReady: boolean
+    setSocketIsReady: () => void
 }
 
 const useChatStore = create<ChatStoreState>((set) => ({
     friends: [],
     listChats: [],
+    socketIsReady: false,
+    setSocketIsReady: () => set(() => ({ socketIsReady: true })),
     currentChat: null,
     setCurrentChat: (currentChat) => set(() => ({ currentChat })),
     chats: [],

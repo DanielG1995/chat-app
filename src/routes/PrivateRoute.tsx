@@ -34,7 +34,7 @@ export const PrivateRoute: FC<PrivateRouteProps> = ({ element }) => {
 
 
     return isAuthenticated ? (<div className="flex flex-col grow">
-        <div className="flex flex-row w-full">
+        <div className="flex flex-row w-full max-h-screen">
             <Sidebar />
             <section className="grow flex flex-row">
                 {element}
