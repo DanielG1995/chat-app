@@ -2,51 +2,68 @@ import { useEffect, useMemo } from "react";
 import SocketIOClient from "socket.io-client";
 
 import { getTokenFromCookie } from "../utlis/helpers";
-import useChatStore from "../store/store";
+import useChatStore, { Message } from "../store/store";
 import { Chat } from "../interfaces";
 
 export const useChat = () => {
     const baseUrl = import.meta.env.VITE_URL_SERVER_CHAT
-    const { loadChats, friends, addMessages, updateLastMessage } = useChatStore()
+    const { loadChats, loadMessages, setSocketIsReady, addMessages, updateLastMessage, notification, sendNotification } = useChatStore()
+    useEffect(() => {
+        if (!notification) return;
+        emitMessage(notification.event!, notification.message!)
+        sendNotification(null)
+    }, [notification])
+
+    const socket = useMemo(() => SocketIOClient(baseUrl, {
+        transportOptions: {
+            polling: {
+                extraHeaders: {
+                    Authorization: getTokenFromCookie(),
+                },
+            },
+        },
+    }), [])
 
     const emitMessage = (event: string, payload?: Object) => {
-        socket.emit(event, payload)
+
+        try {
+            socket?.id && socket.emit(event, payload)
+        } catch (error) {
+            console.log(error)
+        }
     }
 
 
     useEffect(() => {
-        if (friends.length === 0) return;
-
         socket.on('getAllConversations', (conversations: Chat[]) => {
-            loadChats(conversations.map(c => ({ ...c, participants: [...(c.participants || []).map((p) => friends.find(f => f.id === p)!)] })));
+
+            loadChats(conversations.map(c => {
+                if (c.lastMessage) {
+                    return ({ ...c, lastMessage: { ...c.lastMessage, date: new Date(c?.lastMessage?.date!) } })
+                }
+                return c
+            }));
+            setSocketIsReady();
 
         })
 
         socket.on('message', (message) => {
-          console.log(message)
-          message.date=new Date(message?.date)  
-          addMessages(message)
-          updateLastMessage(message.conversationId, message)
+            message.date = new Date(message?.date)
+            addMessages(message)
+            updateLastMessage(message.conversationId, message)
 
         })
+
+        socket.on('get-messages', (messages) => {
+             loadMessages(messages.map((mssg: Message) => ({ ...mssg, date: new Date(mssg?.date!) })))
+
+        })
+       
         return () => {
             socket.off('message');
-            socket.disconnect()
         };
-    }, [friends]); // 
-    const socket = useMemo(
-        () =>
-            SocketIOClient(baseUrl, {
-                transportOptions: {
-                    polling: {
-                        extraHeaders: {
-                            Authorization: getTokenFromCookie(),
-                        },
-                    },
-                },
-            }),
-        [baseUrl],
-    );
+    }, [socket]); // 
+
 
 
     return {
