@@ -8,3 +8,32 @@ select {
   border: 1px solid black;
   outline: transparent;
 }
+
+::-webkit-scrollbar {
+  width: 10px; 
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+::-webkit-scrollbar-thumb {
+  background: #888; 
+  border-radius: 5px; 
+}
+
+
+::-moz-scrollbar {
+  width: 10px; 
+}
+
+
+::-moz-scrollbar-track {
+  background: #f1f1f1; 
+}
+
+
+::-moz-scrollbar-thumb {
+  background: #888; 
+  border-radius: 5px; 
+}
+
