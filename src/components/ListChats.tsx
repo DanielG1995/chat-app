@@ -12,7 +12,7 @@ export const ListChats = () => {
         <img className="rounded-full" src="https://picsum.photos/50/50" />
         <div className="flex flex-col items-start ">
           <div className="flex flex-row gap-5 items-center">
-            <span className="text-[20px]">{chat.participants?.[0].name}</span>
+            <span className="text-[20px]">{chat.participants.map(p => p.name)}</span>
             <p className="text-gray-400">{chat.lastMessage.date?.toLocaleDateString()}</p>
           </div>
           <p className="text-gray-400 truncate max-w-[150px]">{chat.lastMessage.message}</p>
