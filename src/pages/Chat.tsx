@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef } from "react"
+import { FormEvent, useEffect, useLayoutEffect, useRef } from "react"
 import { useSearchParams } from "react-router-dom"
 import useChatStore from "../store/store"
 import { IoMdSend } from "react-icons/io"
@@ -7,23 +7,34 @@ import { IoMdSend } from "react-icons/io"
 export const Chat = () => {
     const inputRef = useRef<HTMLInputElement>(null)
     const [params] = useSearchParams()
-    const { sendNotification, addMessages, chats, setCurrentChat, messages, loadMessages, currentChat, userId, updateLastMessage } = useChatStore()
+    const { sendNotification, addMessages, chats, setCurrentChat, messages, currentChat, userId, updateLastMessage, socketIsReady } = useChatStore()
+    const divRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
-        console.log(chats)
         if (chats?.length > 0) {
-            setCurrentChat(chats.find(c => c._id === params?.get('id')!) || null)
-            loadMessages(messages)
+            setCurrentChat(chats.find(c => c._id === params?.get('id')!)!)
         }
 
     }, [chats])
 
+    useLayoutEffect(() => {
+        if (socketIsReady)
+            sendNotification({ event: 'get-messages', message: params?.get('id')! })
 
+    }, [params?.get('id')!, socketIsReady])
+
+
+
+    useEffect(() => {
+        if (divRef.current) {
+            divRef.current.scrollTop = divRef.current.scrollHeight + 30;
+        }
+    }, [messages]);
 
     const handleSubmit = (evt: FormEvent<HTMLFormElement>) => {
         evt.preventDefault()
 
         const newMssg = {
-            id: `${new Date().getTime()}`,
+            _id: `${new Date().getTime()}`,
             sendId: userId!,
             friendId: +currentChat?.participants?.[0]?.id!,
             message: inputRef?.current?.value! || '',
@@ -45,13 +56,13 @@ export const Chat = () => {
                 <img className="rounded-full" src="https://picsum.photos/50/50" />
                 <p>{currentChat?.participants?.[0]?.name}</p>
             </section>
-            <section className="m-10 flex flex-col gap-10 p-10 grow">
+            <section ref={divRef} className="m-10 flex flex-col gap-10 p-10 grow overflow-y-auto">
                 {
                     messages.map(msg => (<div
                         className={`relative rounded-[20px] p-3 ${msg.sendId !== userId ? 'self-start bg-slate-800 text-gray-300' : 'self-end  bg-blue-700 text-white'} `}
-                        key={msg.id}>
+                        key={msg._id}>
                         {msg.message}
-                        <span className={`absolute text-[12px] text-gray-400 -bottom-6 ${msg.sendId !== userId ? ' left-0' : 'right-0'}`}>{msg?.date?.toLocaleDateString()}</span>
+                        <span className={`absolute text-[12px] min-w-[70px] text-gray-400 -bottom-6 ${msg.sendId !== userId ? ' left-0' : 'right-0'}`}>{msg?.date?.toLocaleTimeString()}</span>
                     </div>))
                 }
             </section>
