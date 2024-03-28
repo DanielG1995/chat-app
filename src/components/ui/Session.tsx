@@ -1,9 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { deleteCookie } from "../../utlis/helpers"
-import { usePresence } from "../../hooks/usePresence";
 import useChatStore from "../../store/store";
 import { useEffect } from "react";
 import { privateApi } from "../../api/api";
+import { usePresence } from "../../hooks/usePresence";
 import { useChat } from "../../hooks/useChat";
 
 export const Session = () => {
@@ -12,15 +12,8 @@ export const Session = () => {
     deleteCookie();
     navigate('/login')
   }
-  const { notification, setFriends } = useChatStore()
-  usePresence()
-  const { emitMessage } = useChat()
+  const { setFriends, sendNotification, friends } = useChatStore()
 
-
-  useEffect(() => {
-    if (!notification) return;
-    emitMessage(notification.event!, notification.message!)
-  }, [notification])
 
   useEffect(() => {
     const listFriends = async () => {
@@ -30,12 +23,18 @@ export const Session = () => {
       } catch (error) {
         return []
       }
-      emitMessage('getConversations');
     }
     listFriends()
   }, [])
 
+  useEffect(() => {
+    if (friends.length > 0)
+      sendNotification({ event: 'getConversations' });
+  }, [friends])
 
+
+  usePresence()
+  useChat()
   return (
 
     <button onClick={singout} className="m-auto p-5 my-10 rounded-[20px] border self-end">Cerrar Sesión</button>
