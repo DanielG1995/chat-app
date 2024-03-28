@@ -1,4 +1,4 @@
-import { Message } from "../store/store"
+import { Message, Participant } from "../store/store"
 
 export interface Friend {
     name: string,
@@ -15,6 +15,6 @@ export interface FriendRequest {
 
 export interface Chat {
     _id: string;
-    participants: number[]
+    participants: Participant[]
     lastMessage: Message
 }

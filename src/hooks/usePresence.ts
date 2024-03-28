@@ -9,17 +9,6 @@ export const usePresence = () => {
     const baseUrl = import.meta.env.VITE_URL_PRESENCE
     const { setFriendStatus } = useChatStore()
 
-
-    useEffect(() => {
-        socket.on('friendActive', (friend: Friend) => {
-            console.log('FRIEND ACTIVE', friend)
-            setFriendStatus(friend.isActive, friend.id)
-        })
-        return () => {
-            socket.emit('updateActiveStatus', false);
-            socket.off('friendActive');
-        };
-    }, []); // 
     const socket = useMemo(
         () =>
             SocketIOClient(baseUrl, {
@@ -31,8 +20,17 @@ export const usePresence = () => {
                     },
                 },
             }),
-        [baseUrl],
+        [],
     );
+    useEffect(() => {
+        socket.on('friendActive', (friend: Friend) => {
+            setFriendStatus(friend.isActive, friend.id)
+        })
+        return () => {
+            socket.emit('updateActiveStatus', false);
+            socket.off('friendActive');
+        };
+    }, [socket]); // 
 
 
     return {
